@@ -12,15 +12,15 @@ Jaeger Tracing is used to monitor the duration of the request, and break it down
 
 
 
-Jaeger Tracing 
+### Jaeger Tracing
 In distributed tracing, the tracing system doesn’t necessarily sit in the same node as the service being traced. A common practise is to deploy an agent, as a separate container, in the same pod as the service being traced. The method of adding another container to a pod, with the purpose of running an infrastructure service, is referred to as adding a sidecar.
 
 This tutorial shows how to add the Jaeger Agent as a sidecar in Kubernetes, and have it send spans to the Jaeger Collector, deployed to another pod.
 
 
 
-1. Deploy Jaeger
-The first step is to deploy Jaeger, and the recommended way to do this is to install the Jaeger Operator on Kubernetes. This step is also described in the documentation. 
+## Deploy Jaeger
+The first step is to deploy Jaeger, and the recommended way to do this is to install the Jaeger Operator on Kubernetes. This step is also described in the documentation.
 
 First, create a namespace:
 
@@ -30,8 +30,9 @@ The namespace is used in the deployment files used in this tutorial. The Jaeger 
 
 Next the operator is installed:
 
+```bash
 $ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing_v1_jaeger_crd.yaml
-
+```
 
 $ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
 
@@ -58,7 +59,7 @@ $ kubectl get deployment jaeger-operator -n observability
 NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 jaeger-operator   1         1         1            1           52s
 
-When the operator is available, create the instance. First create a file with the configuration, let’s call it jaegerdemo.yaml, and add the following to the file: 
+When the operator is available, create the instance. First create a file with the configuration, let’s call it jaegerdemo.yaml, and add the following to the file:
 
 apiVersion: jaegertracing.io/v1
 kind: Jaeger
@@ -103,7 +104,7 @@ The last part of setting up Jaeger, is to get the IP address where the UI servic
 $ kubectl describe nodes | grep External
   ExternalIP:  xxx.xxx.xxx.xxx
 
-Now the Jaeger UI should be able to load from a browser, in this case, navigate to http://xxx.xxx.xxx.xxx:30902 
+Now the Jaeger UI should be able to load from a browser, in this case, navigate to http://xxx.xxx.xxx.xxx:30902
 
 2. Create Python Application
 There are two steps to creating the Python application for this tutorial. First the Python application itself is created, and then it’s containerized so it easily can be deployed in the Kubernetes environment, with Jaeger Agent as a sidecar.
@@ -113,7 +114,7 @@ The application is very simple in this tutorial, and the focus is of course on h
 
 Jaeger Tracing is used to monitor the duration of the request, and break it down, to see where the time is spent.
 Application Endpoint
-First the endpoint is created by using Flask. The class Flask is imported from the flask-package, and then used to create an application object as an instance of the class. 
+First the endpoint is created by using Flask. The class Flask is imported from the flask-package, and then used to create an application object as an instance of the class.
 
 The endpoint, in this case /jokes, is defined with the @app.route decorator. The decorator takes a function as a parameter, and the functionality of the application will reside in this function.
 
@@ -130,7 +131,7 @@ def request_numberinfo():
 if __name__ == "__main__":
   app.run(host="0.0.0.0", port=int("5000"))
 
-Adding functionality 
+Adding functionality
 As previously described, the functionality of this simple application is to pick a random number, and return trivia about that number. For this purpose the free Numbers API service used. This API can return trivia based on a number:
 
 $ curl http://numbersapi.com/42
@@ -162,7 +163,7 @@ The client supports different sampling types (see documentation), and in this tu
 The code for configuring the client, and initializing the Jaeger tracer instance, looks like this:
 
 from jaeger_client import Config
- 
+
 def init_tracer():
   config = Config(
     config={
@@ -256,7 +257,7 @@ if __name__ == "__main__":
   app.run(host="0.0.0.0", port=int("5000"))
 
 3. Containerize with Docker
-The Python application is containerized with Docker, to make it easy to deploy in Kubernetes. Docker needs two files, besides the application file, and that’s a requirements.txt file and a Dockerfile. 
+The Python application is containerized with Docker, to make it easy to deploy in Kubernetes. Docker needs two files, besides the application file, and that’s a requirements.txt file and a Dockerfile.
 requirements.txt
 This file tells Docker which libraries to include, besides the standard libraries. The Python application depends on three libraries, including the Jaeger client, so these are listed in the text file:
 
@@ -266,7 +267,7 @@ requests
 jaeger_client
 
 Dockerfile
-The Dockerfile (no extension) contains instructions to build the Docker image. The commands can be run manually, but with the Dockerfile, the image can be built with just one command, the docker build command. 
+The Dockerfile (no extension) contains instructions to build the Docker image. The commands can be run manually, but with the Dockerfile, the image can be built with just one command, the docker build command.
 
 The commands needed to build the Python application image are the following:
 
@@ -282,7 +283,7 @@ The image will be based off a Python image, using the slim version of Debian Bus
 
 The dependencies listed in the requirements.txt file will be installed, and port 5000 will be exposed, so the application’s endpoint can be reached outside the container. The last line of the Dockerfile tells the container what to execute at startup.
 Build and Push image
-After creating the Python application file, the requirements.txt file and the Dockerfile, the image can be built and pushed to Docker Hub. 
+After creating the Python application file, the requirements.txt file and the Dockerfile, the image can be built and pushed to Docker Hub.
 
 To build the image, use this command:
 
@@ -293,7 +294,7 @@ After building the image, push it the Docker Hub:
 
 $ docker push <your-username>/pythonapp:latest
 
-The image can now be used to deploy the application on Kubernetes. 
+The image can now be used to deploy the application on Kubernetes.
 
 Test the image
 The image can be tested with the docker run command:
@@ -307,11 +308,11 @@ $ curl http://localhost:5000/numbers
 9 is the number of innings in a regulation, non-tied game of baseball.
 
 4. Deploy Application w/Sidecar
-The Python application is already prepared to send traces to a Jaeger agent, since Jaeger’s Python client automatically will find the agent, if it’s present. What’s needed in this step, is to deploy both the application and the agent (as a sidecar) in the same pod. 
+The Python application is already prepared to send traces to a Jaeger agent, since Jaeger’s Python client automatically will find the agent, if it’s present. What’s needed in this step, is to deploy both the application and the agent (as a sidecar) in the same pod.
 
 The Kubernetes Deployment YAML file is defining the containers and configurations, and is all needed to deploy the application and agent sidecar in the same pod.
 General information
-First define the version, kind and metadata. 
+First define the version, kind and metadata.
 
 apiVersion: apps/v1
 kind: Deployment
@@ -319,7 +320,7 @@ metadata:
   name: pythonapp-deployment
   namespace: default
 
-The namespace default was created while setting up Jaeger Tracing. 
+The namespace default was created while setting up Jaeger Tracing.
 Deployment Spec
 The spec object is used to define which containers to deploy and their configurations. The label selector groups and identifies the objects in this deployment.   
 
@@ -334,7 +335,7 @@ spec:
         app: pythonapp
     spec:
       containers:
-        # add containers	
+        # add containers
 
 Containers
 Two containers will be deployed with this YAML file, the Python application container and the Jaeger Agent container. Each container is specified as a template in the spec object.
@@ -406,7 +407,7 @@ spec:
         args: ["--collector.host-port=10.111.112.10:14267"]
 
 Deploy
-The Python application, and Jaeger Agent sidecar, can now be deployed on the same Kubernetes cluster as Jaeger Tracing. This is done using kubectl create: 
+The Python application, and Jaeger Agent sidecar, can now be deployed on the same Kubernetes cluster as Jaeger Tracing. This is done using kubectl create:
 
 $ kubectl create -f python-app-jaeger-agent.yml
 
@@ -438,7 +439,7 @@ First, navigate to endpoint in the browser. The IP address is the same as retrie
 
 
 
-Now go to the Jaeger Tracing UI, to see the trace of the request. Navigate to the same IP address as used in the endpoint, but use the exposed Jaeger UI port. In this 
+Now go to the Jaeger Tracing UI, to see the trace of the request. Navigate to the same IP address as used in the endpoint, but use the exposed Jaeger UI port. In this
 
 http://xxx.xxx.xxx.xxx:30902
 
@@ -453,4 +454,5 @@ The spans shows the overall HTTP GET request span, and the span of the external 
 
 This concludes this minimal test. It shows the application is sending the spans to the sidecar agent, the agent is sending the spans to the collector, which resides in a different Kubernetes pod, and the result is viewable in the Jaeger UI.
 
-
+Conclusion
+sdf
