@@ -51,17 +51,22 @@ jaeger-operator   1         1         1            1           52s
 
 When the operator is available, create the instance. First create a file with the configuration, let’s call it jaegerdemo.yaml, and add the following to the file:
 
+```yaml
 apiVersion: jaegertracing.io/v1
 kind: Jaeger
 metadata:
   name: jaegerdemo
+```
 
 Now apply it to create the instance:
 
+```bash
 $ kubectl apply -f jaegerdemo.yaml
+```
 
 At this point the Jaeger agent, collector and query services are running. Verify the services are running with the get services command:
 
+```bash
 $ kubectl get services
 
 NAME                          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                                                                                                      AGE
@@ -69,25 +74,32 @@ jaegerdemo-agent                ClusterIP   None             <none>        5775/
 jaegerdemo-collector            ClusterIP   10.111.112.10    <none>        9411/TCP,14250/TCP,14267/TCP,14268/TCP                                                                                                       16m10s
 jaegerdemo-collector-headless   ClusterIP   None             <none>        9411/TCP,14250/TCP,14267/TCP,14268/TCP                                                                                                       16d10s
 jaegerdemo-query                ClusterIP   10.111.105.202   <none>        16686/TCP                                                                                                                                    16d10s
+```
 
 The agent service is also active, but it will not be used in this tutorial. Instead the agent will be run as a sidecar next to the Python application.
 
 Jaeger is running in a pod created by the operator, the status of the pod can be verified with this command:
 
+```bash
 $ kubectl get pods
 NAME                          READY   STATUS    RESTARTS   AGE
 jaegerdemo-66b675b846-qhzw4   1/1     Running   0          81s
+```
 
 As a final step in setting up Jaeger, the query service is exposed, so the UI can be accessed from a browser.
 
+```bash
 $ kubectl expose deployment jaegerdemo --type=NodePort --port 16686 --name=jaeger-expose
+```
 
 Now run this command to see the exposed port numbers:
 
+```bash
 $ kubectl get services jaeger-expose
 
 NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                                                                                                AGE
 jaeger-expose   NodePort   172.21.232.234   <none>        16686:30902/TCP   87m
+```
 
 The last part of setting up Jaeger, is to get the IP address where the UI service are accessible. The IP address configured for the node can be obtained with this command:
 
