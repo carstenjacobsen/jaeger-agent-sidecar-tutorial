@@ -40,20 +40,14 @@ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operato
 kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/operator.yaml
 ```
 
-See the content of the YAML files here:
-
-jaegertracing_v1_jaeger_crd.yaml
-service_account.yaml
-role.yaml
-role_binding.yaml
-operator.yaml
-
 After the Jaeger operator has been deployed, a Jaeger instance can be created. The status of the deployment can be checked with this command:
 
+```bash
 $ kubectl get deployment jaeger-operator -n observability
 
 NAME              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 jaeger-operator   1         1         1            1           52s
+```
 
 When the operator is available, create the instance. First create a file with the configuration, let’s call it jaegerdemo.yaml, and add the following to the file:
 
