@@ -24,7 +24,9 @@ The first step is to deploy Jaeger, and the recommended way to do this is to ins
 
 First, create a namespace:
 
-kubectl create namespace observability
+```bash
+$ kubectl create namespace observability
+```
 
 The namespace is used in the deployment files used in this tutorial. The Jaeger operator can be installed using a different namespace, if the deployment files are updated with the namespace.
 
