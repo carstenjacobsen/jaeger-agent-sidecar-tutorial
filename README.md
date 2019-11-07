@@ -502,3 +502,5 @@ This concludes this minimal test. It shows the application is sending the spans 
 
 ## Conclusion
 This tutorial illustrates how to setup Jaeger Tracing, and trace a simple Python application, with the Jaeger Agent running as a sidecar. This tutorial only serves the purpose of showing a very basic implementation. Other considerations may apply for production use.
+
+For more information about how to use Jaeger Tracing, see the [documentation](https://www.jaegertracing.io/docs).
